@@ -5,5 +5,5 @@ tf/.terraform/*
 tf/*.tfstate
 tf/*.tstate.*
 
-# tf variable files
+# tf variable files - sensitive data, different variables for different users
 # tf/*.tfvars
