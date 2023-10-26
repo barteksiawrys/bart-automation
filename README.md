@@ -1,0 +1,1 @@
+# Repo do praktykowania automatyzacji
