@@ -11,10 +11,10 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "rg-mgmt" {
-  name     = "rg-mgmt"
+resource "azurerm_resource_group" "rg-tf" {
+  name     = "rg-tf"
   location = "Poland Central"
   tags = {
-    environment = "mgmt"
+    environment = "tf"
   }
 }
