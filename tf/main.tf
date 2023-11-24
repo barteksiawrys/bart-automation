@@ -14,7 +14,19 @@ provider "azurerm" {
 resource "azurerm_resource_group" "rg-tf" {
   name     = "rg-tf"
   location = "Poland Central"
+
   tags = {
-    environment = "tf"
+    environment = "r&d"
+  }
+}
+
+resource "azurerm_virtual_network" "vnet-tf" {
+  name                = "vnet-tf"
+  location            = azurerm_resource_group.rg-tf.location
+  resource_group_name = azurerm_resource_group.rg-tf.name
+  address_space       = ["10.4.0.0/16"]
+
+  tags = {
+    environment = "r&d"
   }
 }
