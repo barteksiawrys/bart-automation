@@ -30,3 +30,10 @@ resource "azurerm_virtual_network" "vnet-tf" {
     environment = "r&d"
   }
 }
+
+resource "azurerm_subnet" "subnet-tf" {
+  name                 = "subnet-tf"
+  resource_group_name  = azurerm_resource_group.rg-tf.name
+  virtual_network_name = azurerm_virtual_network.vnet-tf.name
+  address_prefixes     = ["10.4.1.0/24"]
+}
