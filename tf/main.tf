@@ -48,7 +48,7 @@ resource "azurerm_network_security_group" "nsg-tf" {
   }
 }
 
-resource "azurerm_network_security_rule" "nsr-tf" {
+resource "azurerm_network_security_rule" "nsr-tf-01" {
   name                        = "SSH"
   priority                    = 100
   direction                   = "Inbound"
@@ -56,7 +56,21 @@ resource "azurerm_network_security_rule" "nsr-tf" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = "88.156.143.115/32"
+  source_address_prefix       = "88.156.143.0/24"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg-tf.name
+  network_security_group_name = azurerm_network_security_group.nsg-tf.name
+}
+
+resource "azurerm_network_security_rule" "nsr-tf-02" {
+  name                        = "HTTP"
+  priority                    = 101
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "80"
+  source_address_prefix       = "88.156.143.0/24"
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.rg-tf.name
   network_security_group_name = azurerm_network_security_group.nsg-tf.name
@@ -92,5 +106,33 @@ resource "azurerm_network_interface" "nic-tf" {
 
   tags = {
     environment = "r&d"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "vm-tf" {
+  name                  = "vm-tf"
+  resource_group_name   = azurerm_resource_group.rg-tf.name
+  location              = azurerm_resource_group.rg-tf.location
+  size                  = "Standard_B1ls"
+  admin_username        = "adminuser"
+  network_interface_ids = [azurerm_network_interface.nic-tf.id]
+
+  custom_data = filebase64("customdata.tpl")
+
+  admin_ssh_key {
+    username   = "adminuser"
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
   }
 }
