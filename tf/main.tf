@@ -135,4 +135,17 @@ resource "azurerm_linux_virtual_machine" "vm-tf" {
     sku       = "22_04-lts"
     version   = "latest"
   }
+
+  provisioner "local-exec" {
+    command = templatefile("windows-ssh-script.tpl", {
+      hostname     = self.public_ip_address,
+      user         = "adminuser",
+      identityfile = "~/.ssh/id_rsa"
+    })
+    interpreter = ["Powershell", "-Command"]
+  }
+
+  tags = {
+    environment = "r&d"
+  }
 }
