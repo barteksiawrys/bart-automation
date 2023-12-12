@@ -137,15 +137,24 @@ resource "azurerm_linux_virtual_machine" "vm-tf" {
   }
 
   provisioner "local-exec" {
-    command = templatefile("windows-ssh-script.tpl", {
+    command = templatefile("${var.host_os}-ssh-script.tpl", {
       hostname     = self.public_ip_address,
       user         = "adminuser",
       identityfile = "~/.ssh/id_rsa"
     })
-    interpreter = ["Powershell", "-Command"]
+    interpreter = var.host_os == "windows" ? ["Powershell", "-Command"] : ["bash", "-c"]
   }
 
   tags = {
     environment = "r&d"
   }
+}
+
+data "azurerm_public_ip" "data-ip-tf" {
+  name                = azurerm_public_ip.ip-tf.name
+  resource_group_name = azurerm_linux_virtual_machine.vm-tf.resource_group_name
+}
+
+output "public_ip" {
+  value = "${azurerm_linux_virtual_machine.vm-tf.name}: ${data.azurerm_public_ip.data-ip-tf.ip_address}"
 }
