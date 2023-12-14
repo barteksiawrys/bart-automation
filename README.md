@@ -1,1 +1,1 @@
-# Repo do praktykowania automatyzacji
+# Na podstawie warsztatów Palo Alto
