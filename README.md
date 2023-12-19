@@ -1,1 +1,1 @@
-# Na podstawie warsztatów Palo Alto
+# RG z PostgreSQL
