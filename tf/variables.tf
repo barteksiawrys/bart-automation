@@ -9,13 +9,7 @@ variable "rg_name" {
   description = "The Azure resource group"
 }
 
-variable "k8s_version" {
-  default     = "1.28.3"
-  type        = string
-  description = "The version of Kubernetes"
-}
-
-variable "ssh_key" {
-  type        = string
-  description = "The SSH public key"
+variable "name_prefix" {
+  default     = "postgres"
+  description = "Prefix of the resource name."
 }
