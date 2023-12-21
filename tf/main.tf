@@ -1,21 +1,4 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "3.77.0"
-    }
-  }
-  
-  # remote state
-  #backend "azurerm" {
-  #  resource_group_name  = "mgmt"
-  #  storage_account_name = "tfstate8250"
-  #  container_name       = "tfstate"
-  #  key                  = "terraform.tfstate"
-  #}
+resource "azurerm_resource_group" "rg" {
+  name     = "rg-${var.rg_name}-${var.name_suffix}"
+  location = var.location
 }
-
-provider "azurerm" {
-  features {}
-}
-

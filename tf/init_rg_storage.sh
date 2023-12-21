@@ -1,5 +1,5 @@
 #!/bin/bash
-# skrypt do stworzenia pierwszej rg i storage account do zapisywania .tfstate
+# First rg & storage account for remote .tfstate
 
 export RESOURCE_GROUP_NAME=mgmt
 export STORAGE_ACCOUNT_NAME=tfstate$RANDOM
