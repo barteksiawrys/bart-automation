@@ -24,8 +24,25 @@ variable "subnet_db_cidr" {
   type        = string
 }
 
+variable "subnet_pgsql_cidr" {
+  description = "subnet-pgsql address prefixes"
+  type        = string
+}
+
 variable "vm_name" {
   description = "VM hostname"
   type        = string
   default     = "db"
+}
+
+variable "vm_size" {
+  description = "VM size"
+  type        = string
+  default     = "Standard_B1ls"
+}
+
+variable "pgsql_sku_name" {
+  description = "pgsql size"
+  type        = string
+  default     = "GP_Standard_D2ds_v4"
 }

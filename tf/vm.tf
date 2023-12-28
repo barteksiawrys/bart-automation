@@ -1,6 +1,3 @@
-resource "random_uuid" "nic" {
-}
-
 resource "random_id" "nic" {
   byte_length = 3
 }
@@ -21,7 +18,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   name                  = "vm-${var.vm_name}-${var.rg_name}-${var.name_suffix}"
   resource_group_name   = azurerm_resource_group.rg.name
   location              = azurerm_resource_group.rg.location
-  size                  = "Standard_B1ls"
+  size                  = var.vm_size
   admin_username        = "azureuser"
   network_interface_ids = [azurerm_network_interface.nic.id]
 
