@@ -29,6 +29,11 @@ variable "subnet_pgsql_cidr" {
   type        = string
 }
 
+variable "subnet_aks_cidr" {
+  description = "subnet-aks address prefixes"
+  type        = string
+}
+
 variable "vm_name" {
   description = "VM hostname"
   type        = string
@@ -45,4 +50,16 @@ variable "pgsql_sku_name" {
   description = "pgsql size"
   type        = string
   default     = "GP_Standard_D2ds_v4"
+}
+
+variable "k8s_version" {
+  default     = "1.28.3"
+  type        = string
+  description = "The version of Kubernetes"
+}
+
+variable "aks_worker_size" {
+  description = "AKS worker size"
+  type        = string
+  default     = "Standard_B2s"
 }

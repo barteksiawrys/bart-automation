@@ -67,3 +67,10 @@ resource "azurerm_private_dns_zone_virtual_network_link" "pdzvnetlink" {
   virtual_network_id    = azurerm_virtual_network.vnet.id
   resource_group_name   = azurerm_resource_group.rg.name
 }
+
+resource "azurerm_subnet" "subnet-aks" {
+  name                 = "subnet-aks-${var.rg_name}-${var.name_suffix}"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.subnet_aks_cidr]
+}
