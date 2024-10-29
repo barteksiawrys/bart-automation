@@ -6,3 +6,9 @@
 
 # tf variable files - sensitive data, different variables for different users
 #*.tfvars
+
+# priv ssh-keys
+id_rsa
+
+# crash log files
+crash.log
