@@ -1,14 +1,17 @@
-# local .terraform dirs
+# local .terraform directories
 **/.terraform/*
 
-# tf state files
-*.tfstate*
+# .tfstate files
+*.tfstate
+*.tfstate.*
 
-# tf variable files - sensitive data, different variables for different users
+# tf variables files - sensitive data, different variables for different users
 #*.tfvars
+#*.tfvars.json
 
 # priv ssh-keys
 id_rsa
 
 # crash log files
 crash.log
+crash.*.log
