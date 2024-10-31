@@ -1,5 +1,5 @@
 # Terraform & OpenTofu
 
-Content:
-1. tf-azure - Terraform for Azure deployment (VM + PostgreSQL + AKS)
-1. tofu-vsphere - OpenTofu for vSphere deployment (VMs)
+### Content:
+1. _tf-azure_ - Terraform for Azure deployment (VM + PostgreSQL + AKS)
+1. _tofu-vsphere_ - OpenTofu for vSphere deployment (VMs)
