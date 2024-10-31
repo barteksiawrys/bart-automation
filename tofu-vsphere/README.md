@@ -7,3 +7,4 @@ Three different VM types with tagging (VM templates are prepared in advance)
 1. _tofu init_
 1. _tofu plan_
 1. _tofu apply_
+1. _tofu destroy_
