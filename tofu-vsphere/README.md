@@ -1,6 +1,6 @@
 # OpenTofu & vSphere
 
-Three different VM types with tagging (VM templates are prepared in advance).
+Three different VM types with tagging (VM templates are prepared in advance)
 
 ## Steps:
 1. vi terraform.tfvars
