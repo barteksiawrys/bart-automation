@@ -1,4 +1,4 @@
-rg_name     = "ezdrp"          # RG name
+rg_name     = "app"          # RG name
 name_suffix = "tf"             # suffix for all resources
 location    = "Poland Central" # region
 
