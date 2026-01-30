@@ -4,63 +4,84 @@
   become: yes
   vars:
     # Configuration variables - set these values before running
-    new_username: "your_username"  # Change to the username you want to add
-    new_user_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB..."  # Paste your SSH public key here
+    new_username: "username"  # Change to the username you want to add
+    new_user_ssh_key: "ssh-rsa..."  # Paste your SSH public key here
     new_user_shell: "/bin/bash"
     new_user_groups: "sudo,docker"  # Groups to which the user will be added
-    
-  tasks:
-    - name: Check if user already exists
-      getent:
-        database: passwd
-        key: "{{ new_username }}"
-      register: user_exists
-      failed_when: false
-      changed_when: false
+    # Optional: set password for new user in user_secret.yml (var new_user_password, plain text).
+    # Copy user_secret.yml.example to user_secret.yml and set new_user_password (or leave file absent for no password).
 
-    - name: Create user if it doesn't exist
-      user:
+  tasks:
+    - name: Load user secret vars from file (user_secret.yml)
+      ansible.builtin.include_vars:
+        file: user_secret.yml
+      when: (lookup('fileglob', 'user_secret.yml') | length) > 0
+
+    - name: Create user (idempotent - ensures user exists before .ssh and groups)
+      ansible.builtin.user:
         name: "{{ new_username }}"
         shell: "{{ new_user_shell }}"
         create_home: yes
         state: present
-      when: user_exists.ansible_facts.getent_passwd[new_username] is not defined
+        password: "{{ (new_user_password | password_hash('sha512_crypt')) if (new_user_password | default('') | length > 0) else omit }}"
+
+    - name: Fix home directory ownership (so new user can create files)
+      ansible.builtin.command:
+        cmd: "chown -R {{ new_username }}:{{ new_username }} /home/{{ new_username }}"
+      changed_when: true
+
+    - name: Set home directory permissions (read/write/execute for owner only on top level)
+      ansible.builtin.file:
+        path: "/home/{{ new_username }}"
+        state: directory
+        owner: "{{ new_username }}"
+        group: "{{ new_username }}"
+        mode: '0755'
 
     - name: Create .ssh directory for user if it doesn't exist
-      file:
+      ansible.builtin.file:
         path: "/home/{{ new_username }}/.ssh"
         state: directory
         owner: "{{ new_username }}"
         group: "{{ new_username }}"
         mode: '0700'
 
+    - name: Ensure authorized_keys file exists
+      ansible.builtin.file:
+        path: "/home/{{ new_username }}/.ssh/authorized_keys"
+        state: touch
+        owner: "{{ new_username }}"
+        group: "{{ new_username }}"
+        mode: '0600'
+
     - name: Add SSH public key to authorized_keys
-      authorized_key:
-        user: "{{ new_username }}"
+      ansible.builtin.lineinfile:
+        path: "/home/{{ new_username }}/.ssh/authorized_keys"
+        line: "{{ new_user_ssh_key }}"
+        create: no
         state: present
-        key: "{{ new_user_ssh_key }}"
-        exclusive: no  # Doesn't remove existing keys, only adds new one
 
     - name: Check if docker group exists
-      command: getent group docker
+      ansible.builtin.command:
+        cmd: getent group docker
       register: docker_group_check
       failed_when: false
       changed_when: false
 
     - name: Add user to sudo/wheel and docker groups (if docker exists)
-      user:
+      ansible.builtin.user:
         name: "{{ new_username }}"
         groups: "{{ new_user_groups }}"
         append: yes  # Adds to existing groups instead of replacing
       when: docker_group_check.rc == 0
 
     - name: Add user only to sudo/wheel group (if docker doesn't exist)
-      user:
+      ansible.builtin.user:
         name: "{{ new_username }}"
         groups: "sudo"
         append: yes  # Adds to existing groups instead of replacing
       when: docker_group_check.rc != 0
 
     - name: Display configuration completion message
-      debug:
+      ansible.builtin.debug:
         msg: "User {{ new_username }} has been successfully configured with SSH key. Added to sudo group{% if docker_group_check.rc == 0 %} and docker{% endif %}."
