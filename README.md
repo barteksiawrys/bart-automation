@@ -1,4 +1,4 @@
-# Ansible & Terraform & OpenTofu
+# Ansible & Terraform/OpenTofu
 
 ### Content:
 - _ansible-vm_ - simple Ansible playbook for VM
