@@ -1,108 +1,108 @@
-# Ansible Playbook - Konfiguracja zdalnego serwera
+# Ansible Playbook - Remote Server Configuration
 
-Ten playbook Ansible konfiguruje zdalny serwer poprzez:
-- Dodanie nowego użytkownika
-- Skonfigurowanie klucza publicznego SSH
-- Przypisanie użytkownika do grup sudo/wheel i docker
+This Ansible playbook configures a remote server by:
+- Adding a new user
+- Configuring SSH public key
+- Assigning user to sudo/wheel and docker groups
 
-## Wymagania
+## Requirements
 
-- Ansible zainstalowany lokalnie
-- Dostęp do zdalnego serwera (użytkownik z uprawnieniami sudo)
-- Klucz publiczny SSH do dodania
+- Ansible installed locally
+- Access to remote server (user with sudo privileges)
+- SSH public key to add
 
-## Konfiguracja
+## Configuration
 
-### 1. Edytuj playbook
+### 1. Edit the playbook
 
-Otwórz plik `ansible-playbook.yml` i ustaw zmienne:
-- `new_username`: Nazwa użytkownika do utworzenia
-- `new_user_ssh_key`: Twój klucz publiczny SSH (z pliku `~/.ssh/id_rsa.pub` lub podobnego)
+Open the `ansible-playbook.yml` file and set the variables:
+- `new_username`: Username to create
+- `new_user_ssh_key`: Your SSH public key (from `~/.ssh/id_rsa.pub` or similar)
 
-### 2. Skonfiguruj inventory
+### 2. Configure inventory
 
-Edytuj plik `inventory.ini` i dodaj informacje o zdalnym serwerze:
+Edit the `inventory.ini` file and add information about the remote server:
 
 ```ini
 [servers]
-remote_server ansible_host=IP_SERWERA ansible_user=ADMIN_USER ansible_password=HASLO
+remote_server ansible_host=SERVER_IP ansible_user=ADMIN_USER ansible_password=PASSWORD
 ```
 
-**UWAGA**: Dla bezpieczeństwa lepiej użyć `ansible-vault` do szyfrowania haseł lub kluczy SSH.
+**NOTE**: For security, it's better to use `ansible-vault` to encrypt passwords or SSH keys.
 
-### 3. Alternatywnie - użyj zmiennych środowiskowych
+### 3. Alternatively - use environment variables
 
-Możesz też przekazać dane bezpośrednio w komendzie:
+You can also pass data directly in the command:
 
 ```bash
 ansible-playbook ansible-playbook.yml \
-  -i IP_SERWERA, \
+  -i SERVER_IP, \
   -e "ansible_user=ADMIN_USER" \
-  -e "ansible_ssh_pass=HASLO" \
-  -e "new_username=twoj_uzytkownik" \
+  -e "ansible_ssh_pass=PASSWORD" \
+  -e "new_username=your_username" \
   -e "new_user_ssh_key='$(cat ~/.ssh/id_rsa.pub)'"
 ```
 
-## Uruchomienie
+## Running
 
-### Metoda 1: Z plikiem inventory
+### Method 1: With inventory file
 
 ```bash
 ansible-playbook ansible-playbook.yml -i inventory.ini
 ```
 
-### Metoda 2: Bezpośrednio z adresem IP
+### Method 2: Directly with IP address
 
 ```bash
 ansible-playbook ansible-playbook.yml \
-  -i "IP_SERWERA," \
+  -i "SERVER_IP," \
   -e "ansible_user=ADMIN_USER" \
-  -e "ansible_ssh_pass=HASLO" \
-  -e "ansible_become_pass=HASLO_SUDO" \
-  -e "new_username=twoj_uzytkownik" \
+  -e "ansible_ssh_pass=PASSWORD" \
+  -e "ansible_become_pass=SUDO_PASSWORD" \
+  -e "new_username=your_username" \
   -e "new_user_ssh_key='$(cat ~/.ssh/id_rsa.pub)'"
 ```
 
-### Metoda 3: Z użyciem ansible-vault (zalecane)
+### Method 3: Using ansible-vault (recommended)
 
-Najpierw utwórz zaszyfrowany plik z hasłami:
+First, create an encrypted file with passwords:
 
 ```bash
 ansible-vault create group_vars/servers/vault.yml
 ```
 
-Dodaj do niego:
+Add to it:
 ```yaml
-ansible_password: twoje_haslo
-ansible_become_pass: twoje_haslo_sudo
+ansible_password: your_password
+ansible_become_pass: your_sudo_password
 ```
 
-Następnie uruchom:
+Then run:
 ```bash
 ansible-playbook ansible-playbook.yml -i inventory.ini --ask-vault-pass
 ```
 
-## Bezpieczeństwo
+## Security
 
-⚠️ **WAŻNE**: 
-- Nigdy nie commituj plików z hasłami do repozytorium Git
-- Używaj `ansible-vault` do szyfrowania wrażliwych danych
-- Rozważ użycie kluczy SSH zamiast haseł dla połączenia z serwerem
+⚠️ **IMPORTANT**: 
+- Never commit files with passwords to Git repository
+- Use `ansible-vault` to encrypt sensitive data
+- Consider using SSH keys instead of passwords for server connection
 
-## Sprawdzenie
+## Verification
 
-Po uruchomieniu playbooka możesz sprawdzić czy wszystko działa:
+After running the playbook, you can verify if everything works:
 
 ```bash
-# Połącz się z serwerem jako nowy użytkownik
-ssh twoj_uzytkownik@IP_SERWERA
+# Connect to server as new user
+ssh your_username@SERVER_IP
 
-# Sprawdź grupy użytkownika
+# Check user groups
 groups
 
-# Sprawdź uprawnienia sudo
+# Check sudo permissions
 sudo -l
 
-# Sprawdź dostęp do dockera
+# Check docker access
 docker ps
 ```
