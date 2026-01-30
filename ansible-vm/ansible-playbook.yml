@@ -1,0 +1,66 @@
+---
+- name: Konfiguracja zdalnego serwera - dodanie użytkownika z kluczem SSH
+  hosts: all
+  become: yes
+  vars:
+    # Zmienne do konfiguracji - ustaw te wartości przed uruchomieniem
+    new_username: "twoj_uzytkownik"  # Zmień na nazwę użytkownika, którego chcesz dodać
+    new_user_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB..."  # Wklej tutaj swój klucz publiczny SSH
+    new_user_shell: "/bin/bash"
+    new_user_groups: "sudo,docker"  # Grupy do których użytkownik zostanie dodany
+    
+  tasks:
+    - name: Sprawdź czy użytkownik już istnieje
+      getent:
+        database: passwd
+        key: "{{ new_username }}"
+      register: user_exists
+      failed_when: false
+      changed_when: false
+
+    - name: Utwórz użytkownika jeśli nie istnieje
+      user:
+        name: "{{ new_username }}"
+        shell: "{{ new_user_shell }}"
+        create_home: yes
+        state: present
+      when: user_exists.ansible_facts.getent_passwd[new_username] is not defined
+
+    - name: Utwórz katalog .ssh dla użytkownika jeśli nie istnieje
+      file:
+        path: "/home/{{ new_username }}/.ssh"
+        state: directory
+        owner: "{{ new_username }}"
+        group: "{{ new_username }}"
+        mode: '0700'
+
+    - name: Dodaj klucz publiczny SSH do authorized_keys
+      authorized_key:
+        user: "{{ new_username }}"
+        state: present
+        key: "{{ new_user_ssh_key }}"
+        exclusive: no  # Nie usuwa istniejących kluczy, tylko dodaje nowy
+
+    - name: Sprawdź czy grupa docker istnieje
+      command: getent group docker
+      register: docker_group_check
+      failed_when: false
+      changed_when: false
+
+    - name: Dodaj użytkownika do grup sudo/wheel i docker (jeśli docker istnieje)
+      user:
+        name: "{{ new_username }}"
+        groups: "{{ new_user_groups }}"
+        append: yes  # Dodaje do istniejących grup zamiast zastępować
+      when: docker_group_check.rc == 0
+
+    - name: Dodaj użytkownika tylko do grupy sudo/wheel (jeśli docker nie istnieje)
+      user:
+        name: "{{ new_username }}"
+        groups: "sudo"
+        append: yes  # Dodaje do istniejących grup zamiast zastępować
+      when: docker_group_check.rc != 0
+
+    - name: Wyświetl informację o zakończeniu konfiguracji
+      debug:
+        msg: "Użytkownik {{ new_username }} został pomyślnie skonfigurowany z kluczem SSH. Dodany do grupy sudo{% if docker_group_check.rc == 0 %} i docker{% endif %}."
